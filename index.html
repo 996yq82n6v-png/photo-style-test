@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摄影风格倾向测试 · 50题</title>
+<style>
+  :root{
+    --bg:#0e0e10; --card:#18181c; --card2:#202026; --line:#2c2c34;
+    --text:#e9e6e1; --dim:#8b8b95; --gold:#d9a441; --gold2:#f0c675;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--text);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    display:flex; justify-content:center; padding:28px 16px 60px;
+    background-image:radial-gradient(circle at 50% 0%, #1c1c22 0%, #0e0e10 55%);
+  }
+  #app{width:100%; max-width:780px;}
+  .screen{display:none; animation:fade .35s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+  h1{font-size:26px; font-weight:600; letter-spacing:.06em; margin:0 0 6px;}
+  .sub{color:var(--dim); font-size:13px; letter-spacing:.08em; margin-bottom:26px;}
+  .note{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:20px 22px; font-size:14.5px; line-height:1.95; color:#c9c6c1; margin-bottom:24px;
+  }
+  .note b{color:var(--gold2); font-weight:600;}
+  .btn{
+    display:inline-block; border:none; cursor:pointer; border-radius:12px;
+    padding:14px 34px; font-size:15px; letter-spacing:.12em; font-family:inherit;
+    background:linear-gradient(135deg,#d9a441,#b8822c); color:#141414; font-weight:600;
+    transition:transform .15s, box-shadow .15s;
+    box-shadow:0 6px 20px rgba(217,164,65,.18);
+  }
+  .btn:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(217,164,65,.28);}
+  .btn.ghost{
+    background:transparent; color:var(--dim); border:1px solid var(--line);
+    box-shadow:none; font-weight:400; padding:11px 22px; font-size:13.5px;
+  }
+  .btn.ghost:hover{color:var(--text); border-color:#454550; transform:none;}
+  .btn:disabled{opacity:.3; cursor:not-allowed; transform:none;}
+  /* 答题区 */
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .qnum{font-size:13px; color:var(--gold); letter-spacing:.16em; font-variant-numeric:tabular-nums;}
+  .qpart{font-size:12px; color:var(--dim); letter-spacing:.12em;}
+  .track{height:3px; background:#25252c; border-radius:3px; overflow:hidden; margin-bottom:34px;}
+  .fill{height:100%; width:0; background:linear-gradient(90deg,#b8822c,#f0c675); transition:width .3s ease;}
+  .qtext{font-size:19px; line-height:1.75; font-weight:500; margin-bottom:26px; letter-spacing:.02em;}
+  .opt{
+    width:100%; text-align:left; display:flex; gap:14px; align-items:flex-start;
+    background:var(--card); border:1px solid var(--line); border-radius:13px;
+    padding:16px 18px; margin-bottom:11px; cursor:pointer; font-family:inherit;
+    color:#d6d3ce; font-size:15px; line-height:1.72; letter-spacing:.01em;
+    transition:background .16s, border-color .16s, transform .16s;
+  }
+  .opt:hover{background:var(--card2); border-color:#3d3d48; transform:translateX(3px);}
+  .opt .letter{
+    flex:none; width:23px; height:23px; border-radius:50%; border:1px solid #43434f;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11.5px; color:var(--dim); margin-top:2px; transition:.16s;
+  }
+  .opt.selected{background:rgba(217,164,65,.11); border-color:var(--gold); color:#fff;}
+  .opt.selected .letter{background:var(--gold); border-color:var(--gold); color:#141414; font-weight:700;}
+  .footbar{display:flex; justify-content:space-between; align-items:center; margin-top:26px;}
+  .hint{font-size:12px; color:#5c5c66; letter-spacing:.08em;}
+  /* 结果区 */
+  .resultHead{text-align:center; margin-bottom:34px;}
+  .resultHead .eyebrow{font-size:12px; color:var(--dim); letter-spacing:.3em; margin-bottom:14px;}
+  .resultHead .mainName{
+    font-size:32px; font-weight:700; letter-spacing:.06em;
+    background:linear-gradient(135deg,#f0c675,#d9a441 60%,#a8742a);
+    -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:10px;
+  }
+  .resultHead .mixTag{
+    display:inline-block; font-size:13px; color:var(--gold2); border:1px solid #4a3a1c;
+    background:rgba(217,164,65,.08); border-radius:99px; padding:5px 16px; letter-spacing:.1em;
+  }
+  .panel{
+    background:var(--card); border:1px solid var(--line); border-radius:15px;
+    padding:24px 26px; margin-bottom:18px;
+  }
+  .panel h3{
+    font-size:12.5px; letter-spacing:.24em; color:var(--gold); font-weight:600;
+    margin:0 0 16px; text-transform:uppercase;
+  }
+  .masters{display:flex; flex-wrap:wrap; gap:9px;}
+  .masters span{
+    font-size:13.5px; color:#d3d0cb; background:#232329; border:1px solid #33333d;
+    border-radius:99px; padding:7px 15px; letter-spacing:.02em;
+  }
+  .desc{font-size:15px; line-height:2.05; color:#c2bfba; margin:0;}
+  .barRow{display:flex; align-items:center; gap:12px; margin-bottom:9px; font-size:13px;}
+  .barName{flex:none; width:132px; color:#b9b6b1; letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .barRow.top .barName{color:var(--gold2); font-weight:600;}
+  .barTrack{flex:1; height:7px; background:#232329; border-radius:6px; overflow:hidden;}
+  .barFill{height:100%; width:0; border-radius:6px; background:#3d3d48; transition:width .8s cubic-bezier(.2,.8,.2,1);}
+  .barRow.top .barFill{background:linear-gradient(90deg,#b8822c,#f0c675);}
+  .barNum{flex:none; width:26px; text-align:right; color:#77777f; font-variant-numeric:tabular-nums;}
+  .barRow.top .barNum{color:var(--gold2);}
+  .actions{display:flex; gap:12px; justify-content:center; margin-top:30px; flex-wrap:wrap;}
+  @media (max-width:520px){
+    body{padding:20px 13px 50px;}
+    .qtext{font-size:17px;}
+    .opt{font-size:14.2px; padding:14px 15px;}
+    .resultHead .mainName{font-size:25px;}
+    .barName{width:96px; font-size:12px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 开始页 -->
+  <section id="intro" class="screen active">
+    <h1>摄影风格倾向测试</h1>
+    <div class="sub">50 题 · 12 个风格族 · 约 60 位各国大师</div>
+    <div class="note">
+      本测试不考查摄影史知识，也不评判水平高低。<br>
+      每题请凭<b>“你真正会举起相机的那一下”</b>来选，而不是“你觉得哪张更厉害”。<br>
+      部分题目为迫选设计。如果两个都想选，请选那个让你<b>更不舒服、更不像日常习惯</b>的——那往往更接近你尚未被命名的倾向。<br><br>
+      完成后系统会自动统计 12 个风格族的分布，给出你的主型、副型，以及最接近的大师谱系。
+    </div>
+    <button class="btn" onclick="start()">开始测试</button>
+  </section>
+  <!-- 答题页 -->
+  <section id="quiz" class="screen">
+    <div class="topbar">
+      <div class="qnum" id="qnum">1 / 50</div>
+      <div class="qpart" id="qpart"></div>
+    </div>
+    <div class="track"><div class="fill" id="progressFill"></div></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="opts"></div>
+    <div class="footbar">
+      <button class="btn ghost" id="backBtn" onclick="back()">← 上一题</button>
+      <div class="hint">按 1 2 3 4 键也可作答</div>
+    </div>
+  </section>
+  <!-- 结果页 -->
+  <section id="result" class="screen">
+    <div class="resultHead">
+      <div class="eyebrow">YOUR PHOTOGRAPHIC LINEAGE</div>
+      <div class="mainName" id="mainName"></div>
+      <div id="mixTag"></div>
+    </div>
+    <div class="panel">
+      <h3>最接近的大师谱系</h3>
+      <div class="masters" id="masters"></div>
+    </div>
+    <div class="panel">
+      <h3>风格说明</h3>
+      <p class="desc" id="desc"></p>
+    </div>
+    <div class="panel">
+      <h3>12 风格族得分分布</h3>
+      <div id="bars"></div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" onclick="restart()">重新测试</button>
+      <button class="btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">回到顶部</button>
+    </div>
+  </section>
+</div>
+<script>
+/* ---------------- 题库 ---------------- */
+const QS = [
+/* 1 */{q:"你走在陌生街上，最先让你想掏相机的是：",o:[
+ "一个人正好走进一束光里，身后是深黑阴影",
+ "几个人、车、招牌、反光同时挤进一个框，乱得刚刚好",
+ "一个让你心里咯噔一下的人，表情或身体有点不对劲",
+ "半开的门、褪色广告、一只被丢弃的鞋，说不清为什么但颜色位置让你停下"]},
+/* 2 */{q:"面对壮阔风景，你身体的第一反应是：",o:[
+ "找机位、等光、算曝光和层次",
+ "后退再后退，找高点把风景压成一个平面",
+ "找风景里的人：牧民、游客、施工者",
+ "拍不拍都行，若要拍就拍“几乎什么都没有”的空"]},
+/* 3 */{q:"拍一个人时，你最想要的是：",o:[
+ "他/她毫无防备的一瞬真实",
+ "让他/她站进你安排好的光里，无处可藏",
+ "柔光、长曝、半梦半醒，人像从时间里浮出来",
+ "像电影一帧：人在情境中，眼神看向画外"]},
+/* 4 */{q:"整理照片时，最容易被哪种画面留住？",o:[
+ "高反差、粗颗粒、边缘有点脏，情绪压过清晰度",
+ "颜色饱和、构图复杂，多看几秒才找到隐藏秩序",
+ "水平是水平，垂直线是垂直线，像冷静标本",
+ "有人的温度，有具体的善意或具体的痛"]},
+/* 5 */{q:"如果只能选一种方式拍十年：",o:[
+ "等一个瞬间自己发生，不干预、不安排",
+ "把人放进你的光里，相信“被看”会逼出真实",
+ "高反差、粗颗粒、晃动失焦，把街头焦虑烫在底片上",
+ "在混乱里找结构，用彩色层、反射、对角线压住场面"]},
+/* 6 */{q:"“好看”和“有用”，你更放不下哪一个？",o:[
+ "好看，形式本身就是内容",
+ "有用，它得说点关于人和社会的事",
+ "忘不掉，哪怕不舒服",
+ "颜色和物质感本身就能说话"]},
+/* 7 */{q:"你更愿意被哪种评价概括？",o:[
+ "“他/她拍的东西有一种奇怪的平静。”",
+ "“他/她拍的东西让我不舒服，但我忘不掉。”",
+ "“他/她看见了那些通常不被看见的人。”",
+ "“他/她对光有近乎偏执的敏感。”"]},
+/* 8 */{q:"哪一组摄影动作更让你有按快门的冲动？",o:[
+ "森山大道式：高反差、粗颗粒、晃动、失焦",
+ "亚历克斯·韦伯式：浓郁彩色、复杂层、所有东西都在动",
+ "安塞尔·亚当斯式：大画幅、区域曝光、从黑到白的完整层次",
+ "辛迪·舍曼式：布置角色、扮演、让身份变得可疑"]},
+/* 9 */{q:"你更接近哪种摄影状态？",o:[
+ "几乎什么都拍，相机是身体的一部分",
+ "拍得不多，但每次像正式出门，会为一张等很久",
+ "更喜欢可控环境：棚、静物台、反复回去的地方",
+ "常用摄影处理私人东西：家人、记忆、身体"]},
+/* 10 */{q:"十年后有人翻你的照片，你希望他们最先感觉到：",o:[
+ "这个人真的在街上活过",
+ "这个人对光有偏执的敏感",
+ "这个人看见了不被看见的人",
+ "这个人在用照片想事情，而不只是在拍东西"]},
+/* 11 */{q:"拍陌生人时，你更可能：",o:[
+ "先拍下来，再决定要不要沟通",
+ "等对方进入某个情境，再按下",
+ "正式征求意见，甚至安排姿势和背景",
+ "拍背影、局部、擦肩而过，不打扰"]},
+/* 12 */{q:"身体在画面里，你最在意：",o:[
+ "肌肉、皮肤、骨骼的物质感",
+ "欲望、暧昧、私密距离",
+ "社会身份和规训留下的痕迹",
+ "身体作为角色和表演的载体"]},
+/* 13 */{q:"你偏爱的光线是：",o:[
+ "硬光直闪，把瑕疵、皱纹、眼袋都逼出来",
+ "侧逆光、剪影、明暗切割的戏剧性",
+ "柔光、长曝、雾气，轮廓将散未散",
+ "自然平光，尽量不干扰现场"]},
+/* 14 */{q:"背景对你意味着：",o:[
+ "白墙或无背景，让被摄者无处可躲",
+ "街景层叠、反光、招牌，背景也是内容",
+ "环境交代身份：房间、工具、工作现场",
+ "虚构布景，让画面像舞台"]},
+/* 15 */{q:"被摄者的眼神：",o:[
+ "直视镜头，像在逼问观看者",
+ "不看镜头，人在自己的情境里",
+ "闭眼、模糊、转头离开，情绪比眼神重要",
+ "直视但明显在扮演某个角色"]},
+/* 16 */{q:"你更愿意拍：",o:[
+ "家人、爱人、自己的身体和私人空间",
+ "边缘陌生人：病房、夜店、街头谋生者",
+ "名人、模特、造型完整的人",
+ "劳动者、普通人、被时代推着走的人"]},
+/* 17 */{q:"一张肖像最重要的是：",o:[
+ "像不像这个人，有没有保存他的处境",
+ "被看的时候，这个人变成了什么",
+ "有没有暧昧、诗意、说不清的气息",
+ "有没有暴露“身份”本身是一场表演"]},
+/* 18 */{q:"你接受后期吗？",o:[
+ "只调影调，不修内容",
+ "精修皮肤、光、比例，让画面成立",
+ "拼贴、重构、合成，照片不必是记录",
+ "做旧、漏光、颗粒、偏色，保留粗粝感"]},
+/* 19 */{q:"拍身体时你最想：",o:[
+ "把身体拍成雕塑般的形式和物质",
+ "拍出欲望、亲密和危险的距离",
+ "拍疾病、衰老、伤痕，承担一次注视",
+ "拍时尚姿态，让身体成为造型和权力"]},
+/* 20 */{q:"如果被拍者紧张，你会：",o:[
+ "等他放松，抓那个瞬间",
+ "让紧张成为照片的一部分",
+ "聊天、进入他的生活，等关系成立",
+ "干脆让他扮演别人"]},
+/* 21 */{q:"拍空房间时，你更想拍：",o:[
+ "对称、冷面、几乎没有人的空间",
+ "光里的灰尘、窗帘、时间流动的痕迹",
+ "生活留下的记忆：床、桌子、旧物",
+ "颜色和墙面本身的物质关系"]},
+/* 22 */{q:"拍自然时，你更接近：",o:[
+ "崇高山脉、完整影调、从黑到白",
+ "人类改造过的景观：矿山、工厂、堤坝",
+ "画意、雾气、留白、东方意境",
+ "空海、长曝、地平线，让时间变成一块灰"]},
+/* 23 */{q:"拍建筑时，你最在意：",o:[
+ "垂直线、重复、类型学式的精确",
+ "建筑里的人和尺度",
+ "光影切割出的几何瞬间",
+ "把建筑变成超现实或观念拼贴"]},
+/* 24 */{q:"拍静物时，你更想：",o:[
+ "白背景、精确布光、商品般冷静",
+ "日常微光里脆弱的东西",
+ "死亡、身体、物质衰败的隐喻",
+ "摆成寓言或舞台，让物件叙事"]},
+/* 25 */{q:"你对“时间”的表达更接近：",o:[
+ "千分之一秒，抓住决定性瞬间",
+ "长曝，让时间流动成雾或光",
+ "重复拍摄同一类型，让时间变成系列",
+ "老照片、家庭档案、记忆的痕迹"]},
+/* 26 */{q:"你更想做一个项目：",o:[
+ "同一条街拍十年",
+ "同一类建筑拍 100 个",
+ "拍自己家、家人、私人记忆十年",
+ "虚构一座城市或一段历史"]},
+/* 27 */{q:"色彩对你更像：",o:[
+ "黑白灰层次，颜色会干扰结构",
+ "高饱和冲突，颜色就是情绪",
+ "低饱和、淡、将散未散",
+ "商业级精确色，颜色必须被控制"]},
+/* 28 */{q:"构图时你更常：",o:[
+ "找几何、黄金分割、精确的边角关系",
+ "满框、无留白、把所有东西压进来",
+ "中心正面、冷静对称、像标本",
+ "倾斜、失焦、晃动，先要身体感"]},
+/* 29 */{q:"你更迷恋哪种尺度：",o:[
+ "宏大航拍、巨型结构、人的渺小",
+ "等身肖像、身体和眼神",
+ "微观细节、纹理、物质的近距离",
+ "私人小物、桌面、抽屉里的东西"]},
+/* 30 */{q:"一张风景里没有人，你会觉得：",o:[
+ "正好，纯粹的形式和自然",
+ "不行，必须有人才有温度",
+ "人可以只是比例尺",
+ "有人迹痕迹就够，不必有人"]},
+/* 31 */{q:"看到不公场景，你的第一反应是：",o:[
+ "先拍下来，让事情被看见",
+ "介入帮忙，摄影不是第一位",
+ "不拍，但记住那个画面",
+ "把它变成一组观念作品"]},
+/* 32 */{q:"苦难照片对你意味着：",o:[
+ "必须被看见，否则不公继续",
+ "可能消费他人，需要极度谨慎",
+ "形式必须成立，否则只是素材",
+ "可以模糊、诗化，不必直给"]},
+/* 33 */{q:"摄影能改变世界吗？",o:[
+ "能推动政策和社会行动",
+ "至少能改变观看方式",
+ "先改变我自己",
+ "它更多是制造问题，不是给答案"]},
+/* 34 */{q:"你接受摆拍吗？",o:[
+ "尽量不，记录应尊重事情本来样子",
+ "肖像可以摆，为了逼出真实",
+ "观念必须摆，照片是构造出来的",
+ "生活可以重演，记忆本来就不准"]},
+/* 35 */{q:"单张还是系列？",o:[
+ "单张决定性瞬间，一张成立就够",
+ "系列类型学，重复里见结构",
+ "日记式碎片，靠时间积累",
+ "专题叙事，有开头、发展和结尾"]},
+/* 36 */{q:"编辑照片时你更常：",o:[
+ "只选不修，保持现场",
+ "统一调色，让一组照片有色彩气质",
+ "拼贴、多张并置、打破单张叙事",
+ "保留瑕疵、漏光、偏色"]},
+/* 37 */{q:"拍社会边缘时你最怕：",o:[
+ "不尊重，把别人当奇观",
+ "不够有力，没能改变什么",
+ "不够美，形式撑不住",
+ "太说明，变成口号"]},
+/* 38 */{q:"一张照片有道德争议但非常震撼，你会：",o:[
+ "不展，伦理优先",
+ "展，但必须说明背景",
+ "先看形式是否成立",
+ "作为观念材料使用，让争议成为内容"]},
+/* 39 */{q:"你更想进入哪条谱系？",o:[
+ "马格南式纪实",
+ "杜塞尔多夫式冷面",
+ "日本挑衅 / 私摄影",
+ "当代观念艺术"]},
+/* 40 */{q:"相机对你更像：",o:[
+ "武器，用来介入现实",
+ "眼睛，用来抓住世界自己交出的瞬间",
+ "手术刀，用来切开自己的东西",
+ "实验仪器，用来构造问题"]},
+/* 41 */{q:"出门你更常带：",o:[
+ "一机一镜，35mm 或 50mm",
+ "广角加闪光灯",
+ "中画幅、三脚架、测光表",
+ "手机或小相机，随手就拍"]},
+/* 42 */{q:"你更享受：",o:[
+ "扫街几小时，不知道会拍到什么",
+ "棚里控制一整天",
+ "暗房、后期、调色、做书",
+ "研究资料、做项目、整理类型"]},
+/* 43 */{q:"你更希望作品怎么被呈现？",o:[
+ "白墙、大画幅、冷静挂置",
+ "小照片密集贴满墙",
+ "杂志跨页、时尚大片",
+ "书页顺序、纪实专题"]},
+/* 44 */{q:"更想拍成谁那样？",o:[
+ "布列松","森山大道","理查德·阿维顿","安德烈亚斯·古斯基"]},
+/* 45 */{q:"更想拍成谁那样？",o:[
+ "亚历克斯·韦伯","杉本博司","塞巴斯蒂昂·萨尔加多","辛迪·舍曼"]},
+/* 46 */{q:"更想拍成谁那样？",o:[
+ "安塞尔·亚当斯","黛安·阿勃丝","荒木经惟","贝歇夫妇"]},
+/* 47 */{q:"更想拍成谁那样？",o:[
+ "何藩","川内伦子","马丁·帕尔","杰夫·沃尔"]},
+/* 48 */{q:"更想拍成谁那样？",o:[
+ "尤金·史密斯","玛丽·艾伦·马克","赫尔穆特·牛顿","托马斯·鲁夫"]},
+/* 49 */{q:"更想拍成谁那样？",o:[
+ "郎静山","深濑昌久","保罗·斯特兰德","威廉·克莱因"]},
+/* 50 */{q:"如果只能保留一个摄影方向：",o:[
+ "街头瞬间","肖像与时尚","纪实与人文","景观、类型与观念"]}
+];
+/* ---------------- 计分键：题号 → A/B/C/D 各对应风格族 ---------------- */
+const KEY = [
+"1,4,10,7",   "9,6,5,7",    "1,3,7,5",    "2,4,6,10",   "1,3,2,4",
+"1,5,2,4",    "7,2,10,3",   "2,4,9,11",   "2,1,3,8",    "2,9,10,11",
+"2,5,3,12",   "9,8,5,11",   "3,1,7,5",    "3,4,5,11",   "10,5,7,11",
+"8,10,3,5",   "5,3,7,11",   "5,3,11,2",   "9,8,10,3",   "1,3,5,11",
+"6,7,12,4",   "9,6,12,7",   "6,5,1,11",   "3,7,10,11",  "1,7,6,12",
+"5,6,8,11",   "1,4,7,3",    "1,4,6,2",    "6,3,9,7",    "9,5,6,12",
+"5,10,12,11", "5,10,1,7",   "5,10,8,11",  "5,3,11,12",  "1,6,8,5",
+"5,4,11,2",   "10,5,1,11",  "10,5,1,11",  "5,6,8,11",   "2,1,10,11",
+"1,2,9,8",    "2,3,7,6",    "6,8,3,5",    "1,2,3,6",    "4,7,5,11",
+"9,10,8,6",   "1,7,4,11",   "5,10,3,6",   "12,8,9,2",   "1,3,5,6"
+];
+/* ---------------- 12 个风格族 ---------------- */
+const TYPES = {
+ 1:{name:"瞬间几何型", masters:["亨利·卡蒂埃-布列松","何藩","马克·吕布","海伦·莱维特","艾略特·厄维特","吴家林"],
+    desc:"你相信世界会自己把画面交出来。你要的是在场、耐心和一种近乎身体性的预判，迷恋“形式与事件同时到位”的那一下。你不一定追求纪实的社会重量，你更在乎光线、构图和命运恰好咬合的那个瞬间。风险：为了“完美的那一下”，可能错过那些不够完美但更诚实的画面。"},
+ 2:{name:"粗粝街头型", masters:["森山大道","威廉·克莱因","罗伯特·弗兰克","盖瑞·温诺格兰德","特伦特·帕克","须田一政"],
+    desc:"你要的不是好看，是冲击。高反差、粗颗粒、晃动、失焦对你不是技术失误，而是一种伦理选择：拒绝把世界修整成令人安心的样子。你的照片里有一种不肯和解的东西。风险：冲击力本身会变成惯性，不是所有模糊都等于力量。"},
+ 3:{name:"控制肖像 / 时尚型", masters:["理查德·阿维顿","欧文·佩恩","安妮·莱博维茨","赫尔穆特·牛顿","彼得·林德伯格","蒂姆·沃克"],
+    desc:"你相信控制是一种诚实。光、背景、姿态都被你安排，因为你要看的不是“这个人长什么样”，而是“被看的时候，这个人变成了什么”。你不害怕棚拍，不害怕安排。风险：控制太舒服的时候，照片会变得太“正确”，而正确的东西往往缺少那一点活气。"},
+ 4:{name:"彩色复杂型", masters:["亚历克斯·韦伯","威廉·埃格尔斯顿","史蒂芬·肖尔","哈里·格鲁亚特","马丁·帕尔","弗朗哥·丰塔纳"],
+    desc:"你对颜色和复杂性有贪心。你害怕的不是乱，是空——不是留白的空，是没有信息、没有张力的空。你要在混乱底下找到一根极紧的结构线。风险：复杂很容易滑向堆砌，韦伯之所以成立，是因为他在混乱里有极严的结构纪律。"},
+ 5:{name:"社会纪实型", masters:["多萝西娅·兰格","沃克·埃文斯","尤金·史密斯","塞巴斯蒂昂·萨尔加多","唐·麦库林","詹姆斯·纳赫特韦","解海龙"],
+    desc:"你相信照片得说点什么，关于人、社会、不被允许消失的东西。你愿意为一张照片进入现场、等很久、承担代价。风险：使命感可能压过形式，也可能在不知不觉中变成对他人苦难的消费。"},
+ 6:{name:"冷面景观 / 类型型", masters:["贝歇夫妇","安德烈亚斯·古斯基","托马斯·鲁夫","坎迪达·霍弗","爱德华·伯汀斯基","刘易斯·巴尔茨"],
+    desc:"你喜欢站得足够远、足够高，让世界变成可以被阅读的结构。尺度、秩序、平行本身可以说话，你对“抒情”有免疫力。风险：客观很容易变成冷，而冷的照片需要极强的结构纪律才不至于变成图表。"},
+ 7:{name:"时间观念 / 静物型", masters:["杉本博司","罗伯特·梅普尔索普","川内伦子","石内都","沃尔夫冈·蒂尔曼斯"],
+    desc:"你的摄影和时间、记忆、物质衰败、将散未散的东西有关。你不一定需要“事件”，你需要的是存在的微光。你的照片常常安静到让人不太敢大声说话。风险：轻和淡是一种力量，但也可能变成回避。"},
+ 8:{name:"私摄影 / 欲望身体型", masters:["荒木经惟","深濑昌久","东松照明","细江英公","筱山纪信","蜷川实花"],
+    desc:"你的摄影跟私人生活、身体、欲望、记忆纠缠在一起。你不怕把相机对准自己人、自己的痛和亲密关系，你相信最私人的东西可能最普遍。风险：私密不等于自动成立，它同样需要编辑和距离。"},
+ 9:{name:"风景崇高 / 自然物质型", masters:["安塞尔·亚当斯","爱德华·韦斯顿","保罗·斯特兰德","迈克尔·肯纳","卡斯滕·彼得"],
+    desc:"你迷恋自然的崇高、物质的纹理、从黑到白的完整层次。你相信形式本身可以承载敬畏，一张好照片不需要解释。风险：美容易变成安全区，而安全区里的照片会越来越像别人拍过的风景。"},
+ 10:{name:"人文边缘 / 凝视承担型", masters:["黛安·阿勃丝","玛丽·艾伦·马克","吕楠","阮义忠","张照堂","约瑟夫·寇德卡"],
+    desc:"你对“不被看见的人”有一种无法回避的注视冲动。你在乎照片有没有承担一次注视的重量，而不是它美不美。这条路最需要警惕的不是技术，是伦理：你是在看见，还是在消费。"},
+ 11:{name:"舞台观念 / 身份表演型", masters:["辛迪·舍曼","芭芭拉·克鲁格","杰夫·沃尔","王庆松","格里高利·克鲁德森","菲利普-洛卡·迪科西亚"],
+    desc:"你不相信照片是窗口，你相信照片是构造。身份、媒介、图像本身都是你的材料，你更愿意提出问题而不是给出答案。风险：观念太清楚会变成图解，好作品需要在“看得懂”和“说不清”之间留一道缝。"},
+ 12:{name:"画意 / 记忆氛围型", masters:["郎静山","植田正治","莎莉·曼","约瑟夫·苏德克","莎拉·莫恩"],
+    desc:"你偏画意、留白、雾气、记忆和安静的氛围。你不急着让照片“说明”什么，你让画面自己散开，让观看者把情绪放进去。风险：氛围太舒服会缺少阻力，而没有阻力的照片很难被记住。 "}
+};
+/* ---------------- 逻辑 ---------------- */
+const N = QS.length;
+const state = { idx:0, answers:new Array(N).fill(null) };
+let locked = false;
+const $ = id => document.getElementById(id);
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function start(){
+  state.idx = 0;
+  state.answers = new Array(N).fill(null);
+  show('quiz');
+  renderQuestion();
+  window.scrollTo({top:0});
+}
+function restart(){
+  show('intro');
+  window.scrollTo({top:0});
+}
+function partLabel(i){
+  if(i<10) return "PART A · 街头与瞬间";
+  if(i<20) return "PART B · 肖像、身体与光";
+  if(i<30) return "PART C · 景观、静物与时间";
+  if(i<40) return "PART D · 纪实、伦理与观念";
+  return "PART E · 工作方式与大师直感";
+}
+function renderQuestion(){
+  const i = state.idx;
+  const q = QS[i];
+  $('qnum').textContent = (i+1) + " / " + N;
+  $('qpart').textContent = partLabel(i);
+  $('progressFill').style.width = (i / N * 100) + "%";
+  $('qtext').textContent = q.q;
+  const box = $('opts');
+  box.innerHTML = "";
+  q.o.forEach((text, k)=>{
+    const b = document.createElement('button');
+    b.className = "opt" + (state.answers[i] === k ? " selected" : "");
+    b.innerHTML = '<span class="letter">' + "ABCD"[k] + '</span><span class="otext"></span>';
+    b.querySelector('.otext').textContent = text;
+    b.onclick = ()=> choose(k);
+    box.appendChild(b);
+  });
+  $('backBtn').disabled = (i === 0);
+}
+function choose(k){
+  if(locked) return;
+  locked = true;
+  state.answers[state.idx] = k;
+  renderQuestion();
+  setTimeout(()=>{
+    locked = false;
+    if(state.idx < N - 1){
+      state.idx++;
+      renderQuestion();
+    } else {
+      $('progressFill').style.width = "100%";
+      showResult();
+    }
+  }, 230);
+}
+function back(){
+  if(state.idx > 0 && !locked){
+    state.idx--;
+    renderQuestion();
+  }
+}
+document.addEventListener('keydown', e=>{
+  if(!$('quiz').classList.contains('active') || locked) return;
+  const m = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3};
+  const k = m[e.key.toLowerCase()];
+  if(k !== undefined) choose(k);
+  if(e.key === 'Backspace'){ e.preventDefault(); back(); }
+});
+/* ---------------- 计算与结果 ---------------- */
+function computeScores(){
+  const s = {};
+  for(let t=1; t<=12; t++) s[t] = 0;
+  state.answers.forEach((a, qi)=>{
+    if(a === null) return;
+    const types = KEY[qi].split(',').map(Number);
+    s[types[a]]++;
+  });
+  return s;
+}
+function showResult(){
+  const scores = computeScores();
+  const ranked = Object.keys(scores)
+    .map(k => ({ type:Number(k), v:scores[k] }))
+    .sort((a,b) => b.v - a.v);
+  const main = ranked[0];
+  const second = ranked[1];
+  const isMix = (main.v - second.v) <= 2 && main.v > 0;
+  // 标题
+  $('mainName').textContent = TYPES[main.type].name;
+  // 混合标签
+  const mixBox = $('mixTag');
+  if(isMix){
+    mixBox.innerHTML = '<span class="mixTag">混合型 · 副型：' +
+      TYPES[second.type].name + '</span>';
+  } else {
+    mixBox.innerHTML = '<span class="mixTag">主型明确 · 副型：' +
+      TYPES[second.type].name + '</span>';
+  }
+  // 大师
+  const mBox = $('masters');
+  mBox.innerHTML = "";
+  const list = isMix
+    ? [...new Set([...TYPES[main.type].masters, ...TYPES[second.type].masters])]
+    : TYPES[main.type].masters;
+  list.forEach(n=>{
+    const sp = document.createElement('span');
+    sp.textContent = n;
+    mBox.appendChild(sp);
+  });
+  // 说明
+  let d = TYPES[main.type].desc;
+  if(isMix){
+    d += "\n\n你的副型是「" + TYPES[second.type].name + "」——" + TYPES[second.type].desc;
+  }
+  $('desc').textContent = d;
+  $('desc').style.whiteSpace = "pre-line";
+  // 条形图
+  const bars = $('bars');
+  bars.innerHTML = "";
+  const max = Math.max(...ranked.map(r=>r.v), 1);
+  ranked.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = "barRow" + (r.type === main.type ? " top" : "");
+    row.innerHTML =
+      '<div class="barName">' + r.type + ' · ' + TYPES[r.type].name + '</div>' +
+      '<div class="barTrack"><div class="barFill"></div></div>' +
+      '<div class="barNum">' + r.v + '</div>';
+    bars.appendChild(row);
+    const fill = row.querySelector('.barFill');
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{ fill.style.width = (r.v / max * 100) + "%"; }, 60);
+    });
+  });
+  show('result');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
